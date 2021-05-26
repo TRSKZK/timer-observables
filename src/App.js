@@ -12,14 +12,9 @@ justify-content:center;
 
 `
 
-const myInterval$ = interval(1000).pipe(
-  startWith(0),
-  scan(time => time += 1),
-  takeWhile(time => time <= 60 )
-)
+const myInterval$ = interval(1000)
 
 
-const minutes$ = concat(myInterval$)
 
 // const action$ = new Subject()
 
@@ -29,22 +24,22 @@ function App() {
   
   useEffect(() => {
     
-    if(start === true) myInterval$.subscribe(setSec)
-     
-    console.log(start);
-    return ()=> myInterval$.unsubscribe()
-  },[])
+    if (start) {
+      const sub = myInterval$.subscribe(setSec)
+      return ()=> sub.unsubscribe()
+    } 
+  },[start])
 
+  const startEvent =()=> myInterval$.subscribe(setStart(true))
+  const stopEvent=()=> myInterval$.subscribe(setStart(false))
   
-  const handleClickFunction = () => {
-    return start === false ? setStart(true)  : setStart(false)
-  }
   
   
   return (
     <Container>
       <h1>{sec}</h1>
-      <button onClick={()=> setStart(true)}>Start</button>
+      <button onClick={startEvent}>Start</button>
+      <button onClick={stopEvent}>Stop</button>
     </Container>
   );
 }
