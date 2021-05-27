@@ -24,7 +24,7 @@ const pause = new Subject
 const start$ = new Subject
 
 const myInterval$ = interval(300).pipe(
-  // startWith(0),
+  startWith(0),
   takeUntil(pause),
   repeatWhen(()=>start$)
 )
@@ -47,7 +47,6 @@ function App() {
   },[start])
 
   const startEvent = () => {
-    // myInterval$.subscribe(setSec(0))
     myInterval$.subscribe(setStart(true))
     start$.next()
   }
