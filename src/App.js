@@ -1,10 +1,10 @@
 
 import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
-import { concat, interval, Subject, } from 'rxjs';
+import {  interval, Subject, } from 'rxjs';
 
-import { startWith, scan, takeWhile, takeLast, takeUntil} from 'rxjs/operators';
-import { flatMap } from 'lodash';
+import { repeatWhen, startWith, takeUntil} from 'rxjs/operators';
+import { ButtonsComponent } from './ButtonsComponent';
 
 const Container = styled.div`
 display:flex;
@@ -14,25 +14,26 @@ align-items: center;
 flex-direction: column;
 
 `
-const ButtonsContainer = styled(Container)`
+export const ButtonsContainer = styled(Container)`
 flex-direction: row;
 gap:5px;
 
 `
+
 const pause = new Subject
 const start$ = new Subject
+
 const myInterval$ = interval(300).pipe(
-  startWith(0),
-  takeUntil(pause)
+  // startWith(0),
+  takeUntil(pause),
+  repeatWhen(()=>start$)
 )
 
 
 
-// const action$ = new Subject()
-
 function App() {
   let [sec, setSec] = useState(0)
-  let [min, setMin] =useState(0)
+  let [min, setMin] = useState(0)
   let [start, setStart] = useState(false);
   
   useEffect(() => {
@@ -46,19 +47,18 @@ function App() {
   },[start])
 
   const startEvent = () => {
-    myInterval$.subscribe(setSec(0))
+    // myInterval$.subscribe(setSec(0))
     myInterval$.subscribe(setStart(true))
+    start$.next()
   }
   
   const stopEvent = () => {
     myInterval$.subscribe(setSec(0))
     myInterval$.subscribe(setStart(false))
+    setMin(0)
   }
   
   const waitEvent = () => {
-    // const lastValue = sec
-    // myInterval$.subscribe(setStart(false))
-    // return lastValue
     pause.next()
   }
   
@@ -69,27 +69,24 @@ function App() {
  }
 
   
-  // if (sec === 60 ) {
-  //   const sub = myInterval$.subscribe(setSec(0))
-  //  sub.unsubscribe()
-  //   setMin(min+=1)
-  // }
+  if (sec === 60 ) {
+    const sub = myInterval$.subscribe(setSec(0))
+   sub.unsubscribe()
+    setMin(min+=1)
+  }
   
   return (
     <Container>
       <h1>{min < 10 ? '0' + min : min}:{sec < 10 ? '0' + sec : sec}</h1>
-
-      <ButtonsContainer>
-      <button onClick={startEvent}>Start</button>
-      <button onClick={stopEvent}>Stop</button>
-      <button onDoubleClick={waitEvent}>Wait</button>
-      <button onClick={resetEvent}>Reset</button>
-
-
-      </ButtonsContainer>
+      <ButtonsComponent
+        start={startEvent}
+        stop={stopEvent}
+        wait={waitEvent}
+        reset={resetEvent} />
       
     </Container>
   );
 }
 
 export default App;
+
