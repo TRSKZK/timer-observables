@@ -20,10 +20,10 @@ gap:5px;
 
 `
 
-const pause = new Subject
-const start$ = new Subject
+const pause = new Subject()
+const start$ = new Subject()
 
-const myInterval$ = interval(300).pipe(
+const myInterval$ = interval(1000).pipe(
   startWith(0),
   takeUntil(pause),
   repeatWhen(()=>start$)
@@ -67,13 +67,16 @@ function App() {
     
  }
 
-  
-  if (sec === 60 ) {
-    const sub = myInterval$.subscribe(setSec(0))
-   sub.unsubscribe()
-    setMin(min+=1)
+  const minuteIncrese = () => {
+    if (sec === 60) {
+      const sub = myInterval$.subscribe(setSec(0))
+      sub.unsubscribe()
+      setMin(min += 1)
+    }
   }
-  
+  minuteIncrese()
+
+
   return (
     <Container>
       <h1>{min < 10 ? '0' + min : min}:{sec < 10 ? '0' + sec : sec}</h1>
